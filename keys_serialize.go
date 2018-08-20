@@ -27,6 +27,10 @@ func (s *EddsaSignature) Deserialize(buf []byte) ([]byte, bool) {
 	return buf, true
 }
 
+func SerializePoint(p ed448.Point) []byte {
+	return p.DSAEncode()
+}
+
 func DeserializePoint(buf []byte) ([]byte, ed448.Point, bool) {
 	if len(buf) < 57 {
 		return buf, nil, false
