@@ -86,3 +86,15 @@ func ValidatePoint(p ed448.Point) error {
 
 	return nil
 }
+
+type Fingerprint [FingerprintLength]byte
+
+func (kp *Keypair) Fingerprint() Fingerprint {
+	return kp.Pub.Fingerprint()
+}
+
+func (p *PublicKey) Fingerprint() Fingerprint {
+	var f Fingerprint
+	Kdfx(usageFingerprint, f[:], p.Serialize())
+	return f
+}

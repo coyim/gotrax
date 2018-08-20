@@ -23,3 +23,10 @@ const (
 	ClientProfileTagDSAKey                = uint16(0x0006)
 	ClientProfileTagTransitionalSignature = uint16(0x0008)
 )
+
+var kdfPrekeyServerPrefix = []byte("OTR-Prekey-Server")
+var kdfPrefix = []byte("OTRv4")
+
+const (
+	usageFingerprint = 0x00
+)
