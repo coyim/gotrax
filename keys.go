@@ -33,6 +33,14 @@ type EddsaSignature struct {
 	s [114]byte
 }
 
+func (pub *PublicKey) K() ed448.Point {
+	return pub.k
+}
+
+func (priv *PrivateKey) K() ed448.Scalar {
+	return priv.k
+}
+
 func CreatePublicKey(k ed448.Point, keyType KeyType) *PublicKey {
 	return &PublicKey{k, keyType}
 }
