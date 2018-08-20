@@ -33,6 +33,14 @@ type EddsaSignature struct {
 	s [114]byte
 }
 
+func CreatePublicKey(k ed448.Point, keyType KeyType) *PublicKey {
+	return &PublicKey{k, keyType}
+}
+
+func CreatePrivateKey(k ed448.Scalar) *PrivateKey {
+	return &PrivateKey{k}
+}
+
 func GenerateKeypair(r WithRandom) *Keypair {
 	sym := [SymKeyLength]byte{}
 	RandomInto(r, sym[:])
