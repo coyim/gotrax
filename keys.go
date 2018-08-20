@@ -41,6 +41,10 @@ func (priv *PrivateKey) K() ed448.Scalar {
 	return priv.k
 }
 
+func (s *EddsaSignature) S() [114]byte {
+	return s.s
+}
+
 func CreateEddsaSignature(k [114]byte) *EddsaSignature {
 	return &EddsaSignature{k}
 }
