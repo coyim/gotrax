@@ -48,6 +48,10 @@ func DeserializePoint(buf []byte) ([]byte, ed448.Point, bool) {
 	return buf[57:], tp, true
 }
 
+func SerializeScalar(s ed448.Scalar) []byte {
+	return s.Encode()
+}
+
 func DeserializeScalar(buf []byte) ([]byte, ed448.Scalar, bool) {
 	if len(buf) < 56 {
 		return nil, nil, false
