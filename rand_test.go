@@ -13,12 +13,6 @@ func (s *GotraxSuite) Test_RandomInto_fillsTheBuffer(c *C) {
 	c.Assert(b, DeepEquals, []byte{0xAB, 0xCD, 0xEF})
 }
 
-func (s *GotraxSuite) Test_RandomInto_returnsErrorOnShortRead(c *C) {
-	b := make([]byte, 3)
-	res := RandomInto(ReaderIntoWithRandom(FixedRand([]string{"ABCD"})), b)
-	c.Assert(res, ErrorMatches, "short read from random source")
-}
-
 func (s *GotraxSuite) Test_DefaultRandom_returnsWithRandomWithRandReader(c *C) {
 	d := DefaultRandom()
 	r := d.(*readerWithRandom).r
