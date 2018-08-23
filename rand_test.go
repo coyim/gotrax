@@ -1,6 +1,7 @@
 package gotrax
 
 import (
+	"bytes"
 	"crypto/rand"
 
 	. "gopkg.in/check.v1"
@@ -11,6 +12,13 @@ func (s *GotraxSuite) Test_RandomInto_fillsTheBuffer(c *C) {
 	res := RandomInto(ReaderIntoWithRandom(FixedRand([]string{"ABCDEF"})), b)
 	c.Assert(res, IsNil)
 	c.Assert(b, DeepEquals, []byte{0xAB, 0xCD, 0xEF})
+}
+
+func (s *GotraxSuite) Test_RandomInto_returnsErrorOnShortRead(c *C) {
+	b := make([]byte, 15)
+	buf := bytes.NewBuffer([]byte{0x42, 0x15})
+	res := RandomInto(ReaderIntoWithRandom(buf), b)
+	c.Assert(res, ErrorMatches, "short read from random source")
 }
 
 func (s *GotraxSuite) Test_DefaultRandom_returnsWithRandomWithRandReader(c *C) {
@@ -41,6 +49,14 @@ func (s *GotraxSuite) Test_fixedRandBytesReader_RandReader_returnsItself(c *C) {
 	rr := v.(*fixedRandBytesReader)
 	val := v.RandReader()
 	c.Assert(val, Equals, rr)
+}
+
+func (s *GotraxSuite) Test_fixedRandBytesReader_willWrapAround(c *C) {
+	b := make([]byte, 15)
+	v := FixedRandBytes([]byte{0x01, 0x02}, []byte{0x03, 0x04})
+	res := RandomInto(v, b)
+	c.Assert(res, IsNil)
+	c.Assert(b, DeepEquals, []byte{0x1, 0x2, 0x3, 0x4, 0x1, 0x2, 0x3, 0x4, 0x1, 0x2, 0x3, 0x4, 0x1, 0x2, 0x3})
 }
 
 func (s *GotraxSuite) Test_FixtureRand_ReturnsAWithRandomSeededWithFixtureData(c *C) {
