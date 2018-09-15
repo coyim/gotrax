@@ -31,6 +31,24 @@ func (s *GotraxSuite) Test_ClientProfile_Validate_checksForExpiry(c *C) {
 	c.Assert(cp.Validate(sita.instanceTag), ErrorMatches, "client profile has expired")
 }
 
+func (s *GotraxSuite) Test_ClientProfile_Validate_checksForPublicKeyPresence(c *C) {
+	cp := generateSitaTestData().clientProfile
+	cp.PublicKey = nil
+	c.Assert(cp.Validate(sita.instanceTag), ErrorMatches, "missing public key in client profile")
+}
+
+func (s *GotraxSuite) Test_ClientProfile_Validate_checksForForgingKeyPresence(c *C) {
+	cp := generateSitaTestData().clientProfile
+	cp.ForgingKey = nil
+	c.Assert(cp.Validate(sita.instanceTag), ErrorMatches, "missing forging key in client profile")
+}
+
+func (s *GotraxSuite) Test_ClientProfile_Validate_checksForSignaturePresence(c *C) {
+	cp := generateSitaTestData().clientProfile
+	cp.Sig = nil
+	c.Assert(cp.Validate(sita.instanceTag), ErrorMatches, "missing signature in client profile")
+}
+
 func (s *GotraxSuite) Test_ClientProfile_Validate_versionsInclude4(c *C) {
 	cp := generateSitaTestData().clientProfile
 	cp.Versions = []byte{0x03}
