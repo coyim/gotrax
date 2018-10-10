@@ -2,6 +2,10 @@ package gotrax
 
 import "github.com/otrv4/ed448"
 
+const (
+	version = uint16(4)
+)
+
 var DsaKeyType = []byte{0x00, 0x00}
 var Ed448KeyType = []byte{0x00, 0x10}
 var Ed448KeyTypeInt = uint16(0x0010)
@@ -34,6 +38,10 @@ const (
 	usageFingerprint = byte(0x00)
 	usageBraceKey    = byte(0x02)
 	usageAuth        = byte(0x11)
+)
+
+const (
+	messageTypePrekeyMessage = uint8(0x0F)
 )
 
 var basePointBytesDup = []byte{

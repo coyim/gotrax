@@ -1,6 +1,7 @@
 package gotrax
 
 import (
+	"math/big"
 	"time"
 
 	. "gopkg.in/check.v1"
@@ -74,4 +75,87 @@ func (s *GotraxSuite) Test_ClientProfile_HasExpired_returnsWhetherItsExpired(c *
 
 	cp.Expiration = time.Date(2017, 11, 5, 13, 46, 00, 13, time.UTC)
 	c.Assert(cp.HasExpired(), Equals, true)
+}
+
+func (s *GotraxSuite) Test_PrekeyProfile_Validate_validatesACorrectPrekeyProfile(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pp, _ := generatePrekeyProfile(gs, sita.instanceTag, time.Date(2028, 11, 5, 4, 46, 00, 13, time.UTC), sita.longTerm)
+	c.Assert(pp.Validate(sita.instanceTag, sita.longTerm.Pub), IsNil)
+}
+
+func (s *GotraxSuite) Test_PrekeyProfile_Validate_checksForCorrectInstanceTag(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pp, _ := generatePrekeyProfile(gs, sita.instanceTag, time.Date(2028, 11, 5, 4, 46, 00, 13, time.UTC), sita.longTerm)
+	pp.InstanceTag = 0xBADBADBA
+	pp.Sig = CreateEddsaSignature(pp.GenerateSignature(sita.longTerm))
+	c.Assert(pp.Validate(sita.instanceTag, sita.longTerm.Pub), ErrorMatches, "invalid instance tag in prekey profile")
+}
+
+func (s *GotraxSuite) Test_PrekeyProfile_Validate_checksValidSignature(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pp, _ := generatePrekeyProfile(gs, sita.instanceTag, time.Date(2028, 11, 5, 4, 46, 00, 13, time.UTC), sita.longTerm)
+	v := pp.Sig.s
+	v[0] = 0x42
+	pp.Sig = CreateEddsaSignature(v)
+	c.Assert(pp.Validate(sita.instanceTag, sita.longTerm.Pub), ErrorMatches, "invalid signature in prekey profile")
+}
+
+func (s *GotraxSuite) Test_PrekeyProfile_Validate_checksForExpiry(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pp, _ := generatePrekeyProfile(gs, sita.instanceTag, time.Date(2028, 11, 5, 4, 46, 00, 13, time.UTC), sita.longTerm)
+	pp.Expiration = time.Date(2017, 11, 5, 13, 46, 00, 13, time.UTC)
+	pp.Sig = CreateEddsaSignature(pp.GenerateSignature(sita.longTerm))
+	c.Assert(pp.Validate(sita.instanceTag, sita.longTerm.Pub), ErrorMatches, "prekey profile has expired")
+}
+
+func (s *GotraxSuite) Test_PrekeyProfile_Validate_checksValidSharedPrekeyPoint(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pp, _ := generatePrekeyProfile(gs, sita.instanceTag, time.Date(2028, 11, 5, 4, 46, 00, 13, time.UTC), sita.longTerm)
+	pp.SharedPrekey = CreatePublicKey(IdentityPoint, Ed448Key)
+	pp.Sig = CreateEddsaSignature(pp.GenerateSignature(sita.longTerm))
+	c.Assert(pp.Validate(sita.instanceTag, sita.longTerm.Pub), ErrorMatches, "prekey profile shared prekey is not a valid point")
+}
+
+func (s *GotraxSuite) Test_PrekeyProfile_Equals_work(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pp, _ := generatePrekeyProfile(gs, sita.instanceTag, time.Date(2028, 11, 5, 4, 46, 00, 13, time.UTC), sita.longTerm)
+	pp2, _ := generatePrekeyProfile(gs, sita.instanceTag, time.Date(2028, 11, 5, 4, 47, 00, 13, time.UTC), sita.longTerm)
+	c.Assert(pp.Equals(pp), Equals, true)
+	c.Assert(pp.Equals(pp2), Equals, false)
+	c.Assert(pp2.Equals(pp2), Equals, true)
+}
+
+func (s *GotraxSuite) Test_PrekeyMessage_Validate_validatesACorrectPrekeyMessage(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pm, _, _, _ := generatePrekeyMessage(gs, sita.instanceTag)
+	c.Assert(pm.Validate(sita.instanceTag), IsNil)
+}
+
+func (s *GotraxSuite) Test_PrekeyMessage_Validate_checksInvalidInstanceTag(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pm, _, _, _ := generatePrekeyMessage(gs, 0xBADBADBA)
+	c.Assert(pm.Validate(sita.instanceTag), ErrorMatches, "invalid instance tag in prekey message")
+}
+
+func (s *GotraxSuite) Test_PrekeyMessage_Validate_checksInvalidYPoint(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pm, _, _, _ := generatePrekeyMessage(gs, sita.instanceTag)
+	pm.Y = IdentityPoint
+	c.Assert(pm.Validate(sita.instanceTag), ErrorMatches, "prekey profile Y point is not a valid point")
+}
+
+func (s *GotraxSuite) Test_PrekeyMessage_Validate_checksInvalidBValue(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pm, _, _, _ := generatePrekeyMessage(gs, sita.instanceTag)
+	pm.B = new(big.Int).SetBytes([]byte{0x00})
+	c.Assert(pm.Validate(sita.instanceTag), ErrorMatches, "prekey profile B value is not a valid DH group member")
+}
+
+func (s *GotraxSuite) Test_PrekeyMessage_Equals_works(c *C) {
+	gs := ReaderIntoWithRandom(FixtureRand())
+	pm, _, _, _ := generatePrekeyMessage(gs, sita.instanceTag)
+	pm2, _, _, _ := generatePrekeyMessage(gs, 0x4243)
+	c.Assert(pm.Equals(pm), Equals, true)
+	c.Assert(pm.Equals(pm2), Equals, false)
+	c.Assert(pm2.Equals(pm2), Equals, true)
 }
