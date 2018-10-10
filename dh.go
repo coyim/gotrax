@@ -6,11 +6,16 @@ import (
 )
 
 var (
-	DHQ         *big.Int
-	G3          *big.Int
-	DHP         *big.Int
+	// DHQ is the Q value for the OTRv4 DH group
+	DHQ *big.Int
+	// G3 is the generator for the OTRv4 DH group
+	G3 *big.Int
+	// DHP is the P value for the OTRv4 DH group
+	DHP *big.Int
+	// DHPMinusTwo is the value of P minus two
 	DHPMinusTwo *big.Int
-	One         *big.Int
+	// One is a cached value of the big int for 1
+	One *big.Int
 )
 
 func init() {
@@ -55,6 +60,7 @@ func init() {
 	One = big.NewInt(1)
 }
 
+// ValidateDHValue returns an error if the given big int can't be proven to be a valid value from the OTRv4 DH group
 func ValidateDHValue(vv *big.Int) error {
 	if vv.Cmp(G3) == -1 {
 		return errors.New("value less than g3")

@@ -6,6 +6,7 @@ import (
 	"github.com/otrv4/ed448"
 )
 
+// RingSignature represents the six values necessary for a ring signature
 type RingSignature struct {
 	C1 ed448.Scalar
 	R1 ed448.Scalar
@@ -65,6 +66,7 @@ func calculateRI(secret, ri ed448.Scalar, isSecret uint32, ci, ti ed448.Scalar) 
 	return ed448.ConstantTimeSelectScalar(ri, ifSecret, isSecret)
 }
 
+// GenerateSignature will generate a constant time ring signature
 func GenerateSignature(wr WithRandom, secret *PrivateKey, pub *PublicKey, A1, A2, A3 *PublicKey, m []byte, f KdfFunc, usage uint8) (*RingSignature, error) {
 	r := &RingSignature{}
 

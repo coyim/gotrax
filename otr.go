@@ -11,6 +11,7 @@ import (
 	"github.com/otrv4/ed448"
 )
 
+// ClientProfile represents an OTR client profile
 type ClientProfile struct {
 	InstanceTag           uint32
 	PublicKey             *PublicKey
@@ -22,6 +23,7 @@ type ClientProfile struct {
 	Sig                   *EddsaSignature
 }
 
+// PrekeyProfile represents an OTR prekey profile
 type PrekeyProfile struct {
 	InstanceTag  uint32
 	Expiration   time.Time
@@ -29,6 +31,7 @@ type PrekeyProfile struct {
 	Sig          *EddsaSignature
 }
 
+// PrekeyMessage represents an OTR prekey message
 type PrekeyMessage struct {
 	Identifier  uint32
 	InstanceTag uint32
@@ -36,6 +39,7 @@ type PrekeyMessage struct {
 	B           *big.Int
 }
 
+// Validate tries to validate the client profile with the given instance tag, returning error on failuer
 func (m *ClientProfile) Validate(tag uint32) error {
 	if m.InstanceTag != tag {
 		return errors.New("invalid instance tag in client profile")
@@ -83,32 +87,39 @@ func (m *ClientProfile) Validate(tag uint32) error {
 	return nil
 }
 
+// Equals returns true if the two client profiles serialize to the same byte array
 func (m *ClientProfile) Equals(other *ClientProfile) bool {
 	return bytes.Equal(m.Serialize(), other.Serialize())
 }
 
+// GenerateSignature will create a signature for the client profile with the given keypair
 func (m *ClientProfile) GenerateSignature(kp *Keypair) [114]byte {
 	msg := m.SerializeForSignature()
 	return ed448.DSASign(kp.Sym, kp.Pub.k, msg)
 }
 
+// HasExpired returns true if the client profile has an expiration time before the current time
 func (m *ClientProfile) HasExpired() bool {
 	return m.Expiration.Before(time.Now())
 }
 
+// Equals returns true if the two prekey profiles serialize to the same byte array
 func (pp *PrekeyProfile) Equals(other *PrekeyProfile) bool {
 	return bytes.Equal(pp.Serialize(), other.Serialize())
 }
 
+// Equals returns true if the two prekey messages serialize to the same byte array
 func (pm *PrekeyMessage) Equals(other *PrekeyMessage) bool {
 	return bytes.Equal(pm.Serialize(), other.Serialize())
 }
 
+// GenerateSignature creates a signature for the given prekey profile with the provided keypair
 func (pp *PrekeyProfile) GenerateSignature(kp *Keypair) [114]byte {
 	msg := pp.SerializeForSignature()
 	return ed448.DSASign(kp.Sym, kp.Pub.k, msg)
 }
 
+// Validate checks whether the prekey profile is correct using the given instance tag and public key
 func (pp *PrekeyProfile) Validate(tag uint32, pub *PublicKey) error {
 	if pp.InstanceTag != tag {
 		return errors.New("invalid instance tag in prekey profile")
@@ -129,6 +140,7 @@ func (pp *PrekeyProfile) Validate(tag uint32, pub *PublicKey) error {
 	return nil
 }
 
+// Validate checks whether the prekey message is correct considering the given instance tag
 func (pm *PrekeyMessage) Validate(tag uint32) error {
 	if pm.InstanceTag != tag {
 		return errors.New("invalid instance tag in prekey message")
@@ -145,6 +157,7 @@ func (pm *PrekeyMessage) Validate(tag uint32) error {
 	return nil
 }
 
+// HasExpired returns true if the prekey profile expiration time is before the current time
 func (pp *PrekeyProfile) HasExpired() bool {
 	return pp.Expiration.Before(time.Now())
 }

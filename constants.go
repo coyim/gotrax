@@ -6,28 +6,53 @@ const (
 	version = uint16(4)
 )
 
+// DsaKeyType represents the DSA key type
 var DsaKeyType = []byte{0x00, 0x00}
+
+// Ed448KeyType represents the Ed448 key type
 var Ed448KeyType = []byte{0x00, 0x10}
+
+// Ed448KeyTypeInt represents the Ed448 key type in integer form
 var Ed448KeyTypeInt = uint16(0x0010)
+
+// SharedPrekeyKeyType represents the shared prekey key type
 var SharedPrekeyKeyType = []byte{0x00, 0x11}
+
+// SharedPrekeyKeyTypeInt represents the shared prekey key type in integer form
 var SharedPrekeyKeyTypeInt = uint16(0x0011)
+
+// ForgingKeyType represents the forging key type
 var ForgingKeyType = []byte{0x00, 0x12}
+
+// ForgingKeyTypeInt represents the forging key type in integer form
 var ForgingKeyTypeInt = uint16(0x0012)
 
+// SymKeyLength is the length of Ed448 symmetric keys
 const SymKeyLength = 57
-const PrivKeyLength = 57
-const FingerprintLength = 56
-const SkLength = 64
 
+// PrivKeyLength is the length of Ed448 private keys
+const PrivKeyLength = 57
+
+// FingerprintLength is the length of OTRv4 fingerprints
+const FingerprintLength = 56
+
+// IdentityPoint is the Ed448 identity point
 var IdentityPoint = ed448.NewPoint([16]uint32{0x00}, [16]uint32{0x01}, [16]uint32{0x01}, [16]uint32{0x00})
 
 const (
-	ClientProfileTagInstanceTag           = uint16(0x0001)
-	ClientProfileTagPublicKey             = uint16(0x0002)
-	ClientProfileTagForgingKey            = uint16(0x0003)
-	ClientProfileTagVersions              = uint16(0x0004)
-	ClientProfileTagExpiry                = uint16(0x0005)
-	ClientProfileTagDSAKey                = uint16(0x0006)
+	// ClientProfileTagInstanceTag is the field identifer for the instance tag field
+	ClientProfileTagInstanceTag = uint16(0x0001)
+	// ClientProfileTagPublicKey is the field identifer for the public key field
+	ClientProfileTagPublicKey = uint16(0x0002)
+	// ClientProfileTagForgingKey is the field identifer for the forging keyfield
+	ClientProfileTagForgingKey = uint16(0x0003)
+	// ClientProfileTagVersions is the field identifer for the versionsfield
+	ClientProfileTagVersions = uint16(0x0004)
+	// ClientProfileTagExpiry is the field identifer for the expiration field
+	ClientProfileTagExpiry = uint16(0x0005)
+	// ClientProfileTagDSAKey is the field identifer for the DSA key field
+	ClientProfileTagDSAKey = uint16(0x0006)
+	// ClientProfileTagTransitionalSignature is the field identifer for the transitional signature field
 	ClientProfileTagTransitionalSignature = uint16(0x0007)
 )
 
